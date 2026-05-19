@@ -470,7 +470,8 @@ NovaSyn MBA is explicitly scoped to exercise every significant Agicore framework
 | App Feature | Agicore Feature Exercised | Status |
 |---|---|---|
 | Business lifecycle stages | COMPILER state machine | pending |
-| AI advisor routing by discipline | ROUTER | pending |
+| Model-tier routing by task complexity | ROUTER (model-tier) | **implemented** |
+| Insight compilation pipelines | COMPILER (semantic transform) | **implemented** |
 | Multi-step onboarding workflow | WORKFLOW | **implemented** |
 | All entity relationships | BELONGS_TO / HAS_MANY | **implemented** |
 | Portfolio synergy AI action | Cross-entity AI_SERVICE input | pending |
@@ -478,6 +479,8 @@ NovaSyn MBA is explicitly scoped to exercise every significant Agicore framework
 | Weekly review reminder | EVENT (scheduled cron) | **implemented** |
 | Stale pipeline alert | RULE + FLAG | **implemented** |
 | LTV:CAC health flag | RULE + FLAG + SEVERITY | **implemented** |
+| Portfolio dashboard view | VIEW dashboard layout | **implemented** |
+| Business browsing view | VIEW cards layout | **implemented** |
 | Kanban pipeline views | Kanban VIEW layout | pending |
 | Business report export | Rich export ACTION PATTERN | pending |
 | Seed demo business | SEED declarations | **implemented** |

@@ -7,11 +7,11 @@
 ## The Agicore compiler generates: SQL migrations, Rust commands,
 ## TypeScript types, Zustand store slices, and React components from this DSL.
 ##
-## TODO(agicore) markers indicate features still awaiting compiler support:
-##   - COMPILER state machine for Business.stage transitions
-##   - ROUTER for tab-driven AI advisor dispatch
+## All major primitives are now implemented:
+##   RULE, SKILL, WORKFLOW, EVENT, ROUTER, COMPILER — fully supported
+## Remaining TODO(agicore):
+##   - COMPILER state machine for Business.stage lifecycle gating
 ##   - Kanban VIEW layout type (content_pipeline, sales_pipeline)
-## All other primitives (RULE, SKILL, WORKFLOW, EVENT) are fully supported.
 
 ## ---------------------------------------------------------------------------
 ## APP
@@ -37,6 +37,49 @@ AI_SERVICE {
     anthropic  "claude-sonnet-4-6"            DEFAULT
     openai     "gpt-4o"                      DEFAULT
   }
+}
+
+## ---------------------------------------------------------------------------
+## ROUTER — Model-Tier Selection by Task Complexity
+## ---------------------------------------------------------------------------
+
+ROUTER advisor_router {
+  DESCRIPTION "Routes MBA advisor tasks to the appropriate model tier based on complexity and scope"
+
+  TIER 1 fast {
+    haiku: anthropic "claude-haiku-4-5-20251001" {
+      STRENGTHS   analysis, general
+      COST        0.1
+      CONTEXT     200000
+      DEFAULT
+    }
+  }
+
+  TIER 2 standard {
+    sonnet: anthropic "claude-sonnet-4-6" {
+      STRENGTHS   analysis, research, strategy, advisory
+      COST        0.3
+      CONTEXT     200000
+      DEFAULT
+    }
+    gpt4o: openai "gpt-4o" {
+      STRENGTHS   analysis, general, advisory
+      COST        0.25
+      CONTEXT     128000
+    }
+  }
+
+  TIER 3 premium {
+    opus: anthropic "claude-opus-4-7" {
+      STRENGTHS   research, synthesis, strategy
+      COST        1.5
+      CONTEXT     200000
+    }
+  }
+
+  TASK_TYPES   analysis, research, synthesis, strategy, advisory, general
+  MOSH_PIT     2
+  CALIBRATION  true
 }
 
 ## ---------------------------------------------------------------------------
@@ -964,10 +1007,69 @@ EVENT quarterly_strategy_review {
   SUBSCRIBERS [strategy_advisor]
 }
 
-## TODO(agicore): ROUTER for AI advisor routing by active business tab
-## This requires a new ACTION_ROUTER declaration type (not model-tier routing).
-## Route: strategy tab -> strategy_advisor, finance tab -> finance_advisor, etc.
-## See DESIGN.md > Feature Requests for specification.
+## ---------------------------------------------------------------------------
+## COMPILER — Semantic Transformation Pipelines
+## ---------------------------------------------------------------------------
+
+COMPILER reviews_to_action_plan {
+  DESCRIPTION  "Distill recent weekly reviews into a prioritized action plan"
+  FROM         weekly_review
+  TO           document
+  EXTRACT      accomplishments, learnings, next_week_focus, energy_level, ceo_time_hours
+  ENRICH {
+    INFER       behavioral_patterns
+    DETECT      recurring_blockers
+    SUGGEST     ceo_time_improvements
+    GENERATE    weekly_action_plan
+  }
+  AI           "Analyze these weekly review entries. Identify patterns the founder repeats week-to-week without resolving. Produce a concrete prioritized action plan for the coming week — not a summary of what was already written, but a synthesis of what the pattern suggests should change."
+  VALIDATE     true
+}
+
+COMPILER advisor_outputs_to_priorities {
+  DESCRIPTION  "Compile multiple discipline advisor briefings into a ranked priority list"
+  FROM         advisor_briefing
+  TO           document
+  EXTRACT      red_flags, recommendations, highest_leverage_moves
+  ENRICH {
+    INFER       cross_discipline_dependencies
+    DETECT      conflicting_priorities
+    SUGGEST     sequencing
+    GENERATE    ranked_30_day_priorities
+  }
+  AI           "You have received briefings from multiple MBA discipline advisors (strategy, operations, finance, marketing, sales, technology, leadership). Your job is to synthesize these into a single ranked priority list. Identify where advisors agree (highest confidence items), where they conflict (requires founder judgment), and produce a sequenced 30-day action plan that respects cross-discipline dependencies."
+  VALIDATE     true
+}
+
+COMPILER financial_data_to_report {
+  DESCRIPTION  "Transform FinancialSnapshot records into a structured business health report"
+  FROM         financial_snapshot
+  TO           document
+  EXTRACT      revenue, cac, ltv, ltv_cac_ratio, gross_margin_pct, mrr, cash_runway_months
+  ENRICH {
+    INFER       trend_direction
+    DETECT      threshold_violations
+    SUGGEST     corrective_actions
+    GENERATE    executive_summary
+  }
+  AI           "Analyze these financial snapshots over time. Calculate trends (improving, stable, declining) for each metric. Flag any metric that has crossed a critical threshold ($20/$200 framework: LTV:CAC < 2, gross margin < 50%, runway < 6 months). Generate an executive summary a solo founder can act on in 15 minutes."
+  VALIDATE     true
+}
+
+COMPILER business_data_to_pitch {
+  DESCRIPTION  "Transform structured business entity data into a pitch narrative outline"
+  FROM         business
+  TO           document
+  EXTRACT      name, tagline, market_niche, business_model, value_proposition, unfair_advantages, primary_moat
+  ENRICH {
+    INFER       investor_appeal
+    SUGGEST     narrative_structure
+    GENERATE    one_pager_outline
+    PRESERVE    founder_voice
+  }
+  AI           "Using the structured business data provided, generate a pitch narrative outline. Follow the structure: Problem → Solution → Why Now → Why Us → Business Model → Traction → Ask. Preserve the founder's original language for the value proposition and unfair advantages — do not sanitize into generic pitch-speak."
+  VALIDATE     false
+}
 
 ## ---------------------------------------------------------------------------
 ## VIEWS
@@ -975,7 +1077,13 @@ EVENT quarterly_strategy_review {
 
 VIEW portfolio_dashboard {
   ENTITY Business
-  LAYOUT list
+  LAYOUT dashboard
+  ACTIONS [advance_business_stage, portfolio_synergy_detector]
+}
+
+VIEW business_cards {
+  ENTITY Business
+  LAYOUT cards
   ACTIONS [advance_business_stage]
 }
 
