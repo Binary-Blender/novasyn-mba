@@ -7,11 +7,8 @@
 ## The Agicore compiler generates: SQL migrations, Rust commands,
 ## TypeScript types, Zustand store slices, and React components from this DSL.
 ##
-## All major primitives are now implemented:
-##   RULE, SKILL, WORKFLOW, EVENT, ROUTER, COMPILER — fully supported
-## Remaining TODO(agicore):
-##   - COMPILER state machine for Business.stage lifecycle gating
-##   - Kanban VIEW layout type (content_pipeline, sales_pipeline)
+## All Agicore primitives fully implemented — no outstanding TODOs.
+##   RULE, SKILL, WORKFLOW, EVENT, ROUTER, COMPILER, STAGES, kanban VIEW
 
 ## ---------------------------------------------------------------------------
 ## APP

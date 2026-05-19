@@ -469,7 +469,7 @@ NovaSyn MBA is explicitly scoped to exercise every significant Agicore framework
 
 | App Feature | Agicore Feature Exercised | Status |
 |---|---|---|
-| Business lifecycle stages | COMPILER state machine | pending |
+| Business lifecycle stages | STAGES lifecycle gating | **implemented** |
 | Model-tier routing by task complexity | ROUTER (model-tier) | **implemented** |
 | Insight compilation pipelines | COMPILER (semantic transform) | **implemented** |
 | Multi-step onboarding workflow | WORKFLOW | **implemented** |
@@ -481,7 +481,7 @@ NovaSyn MBA is explicitly scoped to exercise every significant Agicore framework
 | LTV:CAC health flag | RULE + FLAG + SEVERITY | **implemented** |
 | Portfolio dashboard view | VIEW dashboard layout | **implemented** |
 | Business browsing view | VIEW cards layout | **implemented** |
-| Kanban pipeline views | Kanban VIEW layout | pending |
+| Kanban pipeline views | Kanban VIEW layout + GROUP_BY | **implemented** |
 | Business report export | Rich export ACTION PATTERN | pending |
 | Seed demo business | SEED declarations | **implemented** |
 | Theme and model preferences | PREFERENCE declarations | **implemented** |
@@ -506,22 +506,10 @@ Features still needed for NovaSyn MBA's full feature set. Each has a `## TODO(ag
 
 **Current workaround**: The Rust IMPL stub hand-joins the entities and passes the result as a summary string. Works but loses type safety.
 
-### 3. Kanban VIEW Layout Type
-
-**Needed for**: Content Pipeline (Idea/Drafted/Reviewed/Published columns) and Sales Pipeline (Prospect/Qualified/Proposal/Closed Won/Closed Lost/Referred columns).
-
-**Proposed syntax**: `VIEW content_pipeline { ENTITY ContentPipelineItem LAYOUT kanban GROUP_BY status }`
-
-### 4. PDF/Rich Export ACTION Pattern
+### 3. PDF/Rich Export ACTION Pattern
 
 **Needed for**: `export_business_report` — a formatted PDF with entity tables, metric charts, and structured advisor-briefing sections.
 
-**Proposed syntax**: `ACTION export_business_report { IMPL "export_business_report" PATTERN pdf_export }`
-
-### 5. COMPILER State Machine for Business.stage
-
-**Needed for**: Enforcing lifecycle gate criteria at the DSL level — e.g. preventing a Business from advancing to "Validated" unless a StrategicPosition with value_proposition and target_market exists. Currently handled by the `advance_business_stage` IMPL action with manual validation in Rust.
-
-**Proposed syntax**: See grammar.md COMPILER section. Needs multi-entity condition support (e.g. `REQUIRES StrategicPosition.value_proposition IS NOT NULL`).
+**Proposed syntax**: `ACTION export_business_report { IMPL "export_business_report" PATTERN pdf_export }`.
 
 **Proposed pattern**: A standard IMPL action type that can invoke a Tauri-native PDF renderer and write output to the filesystem with a file picker dialog.
