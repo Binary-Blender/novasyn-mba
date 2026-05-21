@@ -1026,8 +1026,8 @@ EVENT quarterly_strategy_review {
 
 COMPILER reviews_to_action_plan {
   DESCRIPTION  "Distill recent weekly reviews into a prioritized action plan"
-  FROM         weekly_review
-  TO           document
+  FROM         WeeklyReview
+  TO           WeeklyReview
   EXTRACT      accomplishments, learnings, next_week_focus, energy_level, ceo_time_hours
   ENRICH {
     INFER       behavioral_patterns
@@ -1041,9 +1041,9 @@ COMPILER reviews_to_action_plan {
 
 COMPILER advisor_outputs_to_priorities {
   DESCRIPTION  "Compile multiple discipline advisor briefings into a ranked priority list"
-  FROM         advisor_briefing
-  TO           document
-  EXTRACT      red_flags, recommendations, highest_leverage_moves
+  FROM         Business
+  TO           Business
+  EXTRACT      name, stage, market_niche, business_model, notes
   ENRICH {
     INFER       cross_discipline_dependencies
     DETECT      conflicting_priorities
@@ -1056,8 +1056,8 @@ COMPILER advisor_outputs_to_priorities {
 
 COMPILER financial_data_to_report {
   DESCRIPTION  "Transform FinancialSnapshot records into a structured business health report"
-  FROM         financial_snapshot
-  TO           document
+  FROM         FinancialSnapshot
+  TO           FinancialSnapshot
   EXTRACT      revenue, cac, ltv, ltv_cac_ratio, gross_margin_pct, mrr, cash_runway_months
   ENRICH {
     INFER       trend_direction
@@ -1071,9 +1071,9 @@ COMPILER financial_data_to_report {
 
 COMPILER business_data_to_pitch {
   DESCRIPTION  "Transform structured business entity data into a pitch narrative outline"
-  FROM         business
-  TO           document
-  EXTRACT      name, tagline, market_niche, business_model, value_proposition, unfair_advantages, primary_moat
+  FROM         Business
+  TO           Business
+  EXTRACT      name, tagline, market_niche, business_model, revenue_target, notes
   ENRICH {
     INFER       investor_appeal
     SUGGEST     narrative_structure
