@@ -8,7 +8,7 @@ use crate::db::DbPool;
 #[serde(rename_all = "camelCase")]
 pub struct SalesContact {
     pub id: String,
-    pub business_id: i64,
+    pub business_id: String,
     pub name: String,
     pub company: Option<String>,
     pub stage: String,
@@ -17,7 +17,6 @@ pub struct SalesContact {
     pub next_action: Option<String>,
     pub next_action_date: Option<String>,
     pub notes: Option<String>,
-    pub business_id: String,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -25,7 +24,7 @@ pub struct SalesContact {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateSalesContactInput {
-    pub business_id: i64,
+    pub business_id: String,
     pub name: String,
     pub company: Option<String>,
     pub stage: Option<String>,
@@ -34,13 +33,12 @@ pub struct CreateSalesContactInput {
     pub next_action: Option<String>,
     pub next_action_date: Option<String>,
     pub notes: Option<String>,
-    pub business_id: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateSalesContactInput {
-    pub business_id: Option<i64>,
+    pub business_id: Option<String>,
     pub name: Option<String>,
     pub company: Option<String>,
     pub stage: Option<String>,
@@ -64,7 +62,6 @@ impl SalesContact {
             next_action: row.get("next_action").ok(),
             next_action_date: row.get("next_action_date").ok(),
             notes: row.get("notes").ok(),
-            business_id: row.get("business_id").unwrap(),
             created_at: row.get("created_at").unwrap(),
             updated_at: row.get("updated_at").unwrap(),
         }
@@ -89,19 +86,18 @@ pub fn create_sales_contact(db: tauri::State<'_, DbPool>, input: CreateSalesCont
     let id = uuid::Uuid::new_v4().to_string();
     let now = chrono::Utc::now().to_rfc3339();
     conn.execute(
-        "INSERT INTO sales_contacts (id, business_id, name, company, stage, ltv_potential, source, next_action, next_action_date, notes, business_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO sales_contacts (id, business_id, name, company, stage, ltv_potential, source, next_action, next_action_date, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         rusqlite::params![
             id,
             input.business_id,
             input.name,
             input.company,
             input.stage.unwrap_or("prospect".to_string()),
-            input.ltv_potential.unwrap_or(0),
+            input.ltv_potential.unwrap_or(0.0),
             input.source.unwrap_or("inbound".to_string()),
             input.next_action,
             input.next_action_date,
             input.notes,
-            input.business_id,
             &now,
             &now,
         ],

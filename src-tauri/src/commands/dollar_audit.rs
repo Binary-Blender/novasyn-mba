@@ -8,14 +8,13 @@ use crate::db::DbPool;
 #[serde(rename_all = "camelCase")]
 pub struct DollarAudit {
     pub id: String,
-    pub business_id: i64,
+    pub business_id: String,
     pub activity_name: String,
     pub tier: String,
     pub hours_per_week: f64,
     pub ai_transferable: i64,
     pub transfer_status: String,
     pub notes: Option<String>,
-    pub business_id: String,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -23,20 +22,19 @@ pub struct DollarAudit {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateDollarAuditInput {
-    pub business_id: i64,
+    pub business_id: String,
     pub activity_name: String,
     pub tier: Option<String>,
     pub hours_per_week: Option<f64>,
     pub ai_transferable: Option<i64>,
     pub transfer_status: Option<String>,
     pub notes: Option<String>,
-    pub business_id: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateDollarAuditInput {
-    pub business_id: Option<i64>,
+    pub business_id: Option<String>,
     pub activity_name: Option<String>,
     pub tier: Option<String>,
     pub hours_per_week: Option<f64>,
@@ -56,7 +54,6 @@ impl DollarAudit {
             ai_transferable: row.get("ai_transferable").unwrap(),
             transfer_status: row.get("transfer_status").unwrap(),
             notes: row.get("notes").ok(),
-            business_id: row.get("business_id").unwrap(),
             created_at: row.get("created_at").unwrap(),
             updated_at: row.get("updated_at").unwrap(),
         }
@@ -81,17 +78,16 @@ pub fn create_dollar_audit(db: tauri::State<'_, DbPool>, input: CreateDollarAudi
     let id = uuid::Uuid::new_v4().to_string();
     let now = chrono::Utc::now().to_rfc3339();
     conn.execute(
-        "INSERT INTO dollar_audits (id, business_id, activity_name, tier, hours_per_week, ai_transferable, transfer_status, notes, business_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO dollar_audits (id, business_id, activity_name, tier, hours_per_week, ai_transferable, transfer_status, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         rusqlite::params![
             id,
             input.business_id,
             input.activity_name,
             input.tier.unwrap_or("twenty".to_string()),
-            input.hours_per_week.unwrap_or(0),
+            input.hours_per_week.unwrap_or(0.0),
             input.ai_transferable.unwrap_or(0),
             input.transfer_status.unwrap_or("not_started".to_string()),
             input.notes,
-            input.business_id,
             &now,
             &now,
         ],

@@ -22,6 +22,22 @@ pub async fn calculate_ltv_cac(
     input: CalculateLtvCacInput,
     _db: tauri::State<'_, DbPool>,
 ) -> Result<CalculateLtvCacOutput, String> {
-    // TODO: implement calculate_ltv_cac
-    todo!()
+    let ratio = if input.cac > 0.0 {
+        input.ltv / input.cac
+    } else {
+        0.0
+    };
+
+    let health_flag = if ratio >= 3.0 {
+        "healthy".to_string()
+    } else if ratio >= 2.0 {
+        "warning".to_string()
+    } else {
+        "critical".to_string()
+    };
+
+    Ok(CalculateLtvCacOutput {
+        ltv_cac_ratio: ratio,
+        health_flag,
+    })
 }

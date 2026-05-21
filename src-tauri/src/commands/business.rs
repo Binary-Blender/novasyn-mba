@@ -104,7 +104,7 @@ pub fn create_business(db: tauri::State<'_, DbPool>, input: CreateBusinessInput)
             input.category,
             input.market_niche,
             input.business_model,
-            input.revenue_target.unwrap_or(0),
+            input.revenue_target.unwrap_or(0.0),
             input.launch_date,
             input.exit_date,
             input.notes,

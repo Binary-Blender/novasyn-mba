@@ -8,14 +8,13 @@ use crate::db::DbPool;
 #[serde(rename_all = "camelCase")]
 pub struct MarketingAsset {
     pub id: String,
-    pub business_id: i64,
+    pub business_id: String,
     pub asset_type: String,
     pub title: String,
     pub url: Option<String>,
     pub platform: Option<String>,
     pub published_at: Option<String>,
     pub authority_stage_impact: Option<String>,
-    pub business_id: String,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -23,20 +22,19 @@ pub struct MarketingAsset {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateMarketingAssetInput {
-    pub business_id: i64,
+    pub business_id: String,
     pub asset_type: Option<String>,
     pub title: String,
     pub url: Option<String>,
     pub platform: Option<String>,
     pub published_at: Option<String>,
     pub authority_stage_impact: Option<String>,
-    pub business_id: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateMarketingAssetInput {
-    pub business_id: Option<i64>,
+    pub business_id: Option<String>,
     pub asset_type: Option<String>,
     pub title: Option<String>,
     pub url: Option<String>,
@@ -56,7 +54,6 @@ impl MarketingAsset {
             platform: row.get("platform").ok(),
             published_at: row.get("published_at").ok(),
             authority_stage_impact: row.get("authority_stage_impact").ok(),
-            business_id: row.get("business_id").unwrap(),
             created_at: row.get("created_at").unwrap(),
             updated_at: row.get("updated_at").unwrap(),
         }
@@ -81,7 +78,7 @@ pub fn create_marketing_asset(db: tauri::State<'_, DbPool>, input: CreateMarketi
     let id = uuid::Uuid::new_v4().to_string();
     let now = chrono::Utc::now().to_rfc3339();
     conn.execute(
-        "INSERT INTO marketing_assets (id, business_id, asset_type, title, url, platform, published_at, authority_stage_impact, business_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO marketing_assets (id, business_id, asset_type, title, url, platform, published_at, authority_stage_impact, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         rusqlite::params![
             id,
             input.business_id,
@@ -91,7 +88,6 @@ pub fn create_marketing_asset(db: tauri::State<'_, DbPool>, input: CreateMarketi
             input.platform,
             input.published_at,
             input.authority_stage_impact,
-            input.business_id,
             &now,
             &now,
         ],

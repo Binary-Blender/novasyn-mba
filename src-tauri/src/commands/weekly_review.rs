@@ -8,14 +8,13 @@ use crate::db::DbPool;
 #[serde(rename_all = "camelCase")]
 pub struct WeeklyReview {
     pub id: String,
-    pub business_id: Option<i64>,
+    pub business_id: Option<String>,
     pub week_of: String,
     pub accomplishments: Option<String>,
     pub learnings: Option<String>,
     pub next_week_focus: Option<String>,
     pub energy_level: i64,
     pub ceo_time_hours: f64,
-    pub business_id: String,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -23,20 +22,19 @@ pub struct WeeklyReview {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateWeeklyReviewInput {
-    pub business_id: Option<i64>,
+    pub business_id: Option<String>,
     pub week_of: String,
     pub accomplishments: Option<String>,
     pub learnings: Option<String>,
     pub next_week_focus: Option<String>,
     pub energy_level: Option<i64>,
     pub ceo_time_hours: Option<f64>,
-    pub business_id: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateWeeklyReviewInput {
-    pub business_id: Option<i64>,
+    pub business_id: Option<String>,
     pub week_of: Option<String>,
     pub accomplishments: Option<String>,
     pub learnings: Option<String>,
@@ -56,7 +54,6 @@ impl WeeklyReview {
             next_week_focus: row.get("next_week_focus").ok(),
             energy_level: row.get("energy_level").unwrap(),
             ceo_time_hours: row.get("ceo_time_hours").unwrap(),
-            business_id: row.get("business_id").unwrap(),
             created_at: row.get("created_at").unwrap(),
             updated_at: row.get("updated_at").unwrap(),
         }
@@ -81,7 +78,7 @@ pub fn create_weekly_review(db: tauri::State<'_, DbPool>, input: CreateWeeklyRev
     let id = uuid::Uuid::new_v4().to_string();
     let now = chrono::Utc::now().to_rfc3339();
     conn.execute(
-        "INSERT INTO weekly_reviews (id, business_id, week_of, accomplishments, learnings, next_week_focus, energy_level, ceo_time_hours, business_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO weekly_reviews (id, business_id, week_of, accomplishments, learnings, next_week_focus, energy_level, ceo_time_hours, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         rusqlite::params![
             id,
             input.business_id,
@@ -90,8 +87,7 @@ pub fn create_weekly_review(db: tauri::State<'_, DbPool>, input: CreateWeeklyRev
             input.learnings,
             input.next_week_focus,
             input.energy_level.unwrap_or(3),
-            input.ceo_time_hours.unwrap_or(0),
-            input.business_id,
+            input.ceo_time_hours.unwrap_or(0.0),
             &now,
             &now,
         ],

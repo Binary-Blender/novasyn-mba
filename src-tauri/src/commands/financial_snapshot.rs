@@ -8,7 +8,7 @@ use crate::db::DbPool;
 #[serde(rename_all = "camelCase")]
 pub struct FinancialSnapshot {
     pub id: String,
-    pub business_id: i64,
+    pub business_id: String,
     pub period: String,
     pub revenue: f64,
     pub cac: f64,
@@ -18,7 +18,6 @@ pub struct FinancialSnapshot {
     pub mrr: f64,
     pub cash_runway_months: f64,
     pub recorded_at: Option<String>,
-    pub business_id: String,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -26,7 +25,7 @@ pub struct FinancialSnapshot {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateFinancialSnapshotInput {
-    pub business_id: i64,
+    pub business_id: String,
     pub period: String,
     pub revenue: Option<f64>,
     pub cac: Option<f64>,
@@ -36,13 +35,12 @@ pub struct CreateFinancialSnapshotInput {
     pub mrr: Option<f64>,
     pub cash_runway_months: Option<f64>,
     pub recorded_at: Option<String>,
-    pub business_id: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateFinancialSnapshotInput {
-    pub business_id: Option<i64>,
+    pub business_id: Option<String>,
     pub period: Option<String>,
     pub revenue: Option<f64>,
     pub cac: Option<f64>,
@@ -68,7 +66,6 @@ impl FinancialSnapshot {
             mrr: row.get("mrr").unwrap(),
             cash_runway_months: row.get("cash_runway_months").unwrap(),
             recorded_at: row.get("recorded_at").ok(),
-            business_id: row.get("business_id").unwrap(),
             created_at: row.get("created_at").unwrap(),
             updated_at: row.get("updated_at").unwrap(),
         }
@@ -93,20 +90,19 @@ pub fn create_financial_snapshot(db: tauri::State<'_, DbPool>, input: CreateFina
     let id = uuid::Uuid::new_v4().to_string();
     let now = chrono::Utc::now().to_rfc3339();
     conn.execute(
-        "INSERT INTO financial_snapshots (id, business_id, period, revenue, cac, ltv, ltv_cac_ratio, gross_margin_pct, mrr, cash_runway_months, recorded_at, business_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO financial_snapshots (id, business_id, period, revenue, cac, ltv, ltv_cac_ratio, gross_margin_pct, mrr, cash_runway_months, recorded_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         rusqlite::params![
             id,
             input.business_id,
             input.period,
-            input.revenue.unwrap_or(0),
-            input.cac.unwrap_or(0),
-            input.ltv.unwrap_or(0),
-            input.ltv_cac_ratio.unwrap_or(0),
-            input.gross_margin_pct.unwrap_or(0),
-            input.mrr.unwrap_or(0),
-            input.cash_runway_months.unwrap_or(0),
+            input.revenue.unwrap_or(0.0),
+            input.cac.unwrap_or(0.0),
+            input.ltv.unwrap_or(0.0),
+            input.ltv_cac_ratio.unwrap_or(0.0),
+            input.gross_margin_pct.unwrap_or(0.0),
+            input.mrr.unwrap_or(0.0),
+            input.cash_runway_months.unwrap_or(0.0),
             input.recorded_at,
-            input.business_id,
             &now,
             &now,
         ],

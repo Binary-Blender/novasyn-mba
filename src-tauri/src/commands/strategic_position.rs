@@ -8,14 +8,13 @@ use crate::db::DbPool;
 #[serde(rename_all = "camelCase")]
 pub struct StrategicPosition {
     pub id: String,
-    pub business_id: i64,
+    pub business_id: String,
     pub target_market: Option<String>,
     pub value_proposition: Option<String>,
     pub primary_moat: String,
     pub competitors: Option<String>,
     pub unfair_advantages: Option<String>,
     pub moat_score: i64,
-    pub business_id: String,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -23,20 +22,19 @@ pub struct StrategicPosition {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateStrategicPositionInput {
-    pub business_id: i64,
+    pub business_id: String,
     pub target_market: Option<String>,
     pub value_proposition: Option<String>,
     pub primary_moat: Option<String>,
     pub competitors: Option<String>,
     pub unfair_advantages: Option<String>,
     pub moat_score: Option<i64>,
-    pub business_id: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateStrategicPositionInput {
-    pub business_id: Option<i64>,
+    pub business_id: Option<String>,
     pub target_market: Option<String>,
     pub value_proposition: Option<String>,
     pub primary_moat: Option<String>,
@@ -56,7 +54,6 @@ impl StrategicPosition {
             competitors: row.get("competitors").ok(),
             unfair_advantages: row.get("unfair_advantages").ok(),
             moat_score: row.get("moat_score").unwrap(),
-            business_id: row.get("business_id").unwrap(),
             created_at: row.get("created_at").unwrap(),
             updated_at: row.get("updated_at").unwrap(),
         }
@@ -81,7 +78,7 @@ pub fn create_strategic_position(db: tauri::State<'_, DbPool>, input: CreateStra
     let id = uuid::Uuid::new_v4().to_string();
     let now = chrono::Utc::now().to_rfc3339();
     conn.execute(
-        "INSERT INTO strategic_positions (id, business_id, target_market, value_proposition, primary_moat, competitors, unfair_advantages, moat_score, business_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO strategic_positions (id, business_id, target_market, value_proposition, primary_moat, competitors, unfair_advantages, moat_score, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         rusqlite::params![
             id,
             input.business_id,
@@ -91,7 +88,6 @@ pub fn create_strategic_position(db: tauri::State<'_, DbPool>, input: CreateStra
             input.competitors,
             input.unfair_advantages,
             input.moat_score.unwrap_or(5),
-            input.business_id,
             &now,
             &now,
         ],

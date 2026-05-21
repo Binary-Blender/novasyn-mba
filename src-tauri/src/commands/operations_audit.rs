@@ -8,7 +8,7 @@ use crate::db::DbPool;
 #[serde(rename_all = "camelCase")]
 pub struct OperationsAudit {
     pub id: String,
-    pub business_id: i64,
+    pub business_id: String,
     pub knowledge_bottleneck: i64,
     pub quality_bottleneck: i64,
     pub coordination_bottleneck: i64,
@@ -17,7 +17,6 @@ pub struct OperationsAudit {
     pub decision_bottleneck: i64,
     pub overall_score: i64,
     pub audit_date: Option<String>,
-    pub business_id: String,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -25,7 +24,7 @@ pub struct OperationsAudit {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateOperationsAuditInput {
-    pub business_id: i64,
+    pub business_id: String,
     pub knowledge_bottleneck: Option<i64>,
     pub quality_bottleneck: Option<i64>,
     pub coordination_bottleneck: Option<i64>,
@@ -34,13 +33,12 @@ pub struct CreateOperationsAuditInput {
     pub decision_bottleneck: Option<i64>,
     pub overall_score: Option<i64>,
     pub audit_date: Option<String>,
-    pub business_id: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateOperationsAuditInput {
-    pub business_id: Option<i64>,
+    pub business_id: Option<String>,
     pub knowledge_bottleneck: Option<i64>,
     pub quality_bottleneck: Option<i64>,
     pub coordination_bottleneck: Option<i64>,
@@ -64,7 +62,6 @@ impl OperationsAudit {
             decision_bottleneck: row.get("decision_bottleneck").unwrap(),
             overall_score: row.get("overall_score").unwrap(),
             audit_date: row.get("audit_date").ok(),
-            business_id: row.get("business_id").unwrap(),
             created_at: row.get("created_at").unwrap(),
             updated_at: row.get("updated_at").unwrap(),
         }
@@ -89,7 +86,7 @@ pub fn create_operations_audit(db: tauri::State<'_, DbPool>, input: CreateOperat
     let id = uuid::Uuid::new_v4().to_string();
     let now = chrono::Utc::now().to_rfc3339();
     conn.execute(
-        "INSERT INTO operations_audits (id, business_id, knowledge_bottleneck, quality_bottleneck, coordination_bottleneck, communication_bottleneck, creative_bottleneck, decision_bottleneck, overall_score, audit_date, business_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO operations_audits (id, business_id, knowledge_bottleneck, quality_bottleneck, coordination_bottleneck, communication_bottleneck, creative_bottleneck, decision_bottleneck, overall_score, audit_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         rusqlite::params![
             id,
             input.business_id,
@@ -101,7 +98,6 @@ pub fn create_operations_audit(db: tauri::State<'_, DbPool>, input: CreateOperat
             input.decision_bottleneck.unwrap_or(3),
             input.overall_score.unwrap_or(18),
             input.audit_date,
-            input.business_id,
             &now,
             &now,
         ],

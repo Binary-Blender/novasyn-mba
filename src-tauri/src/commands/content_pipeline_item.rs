@@ -8,13 +8,12 @@ use crate::db::DbPool;
 #[serde(rename_all = "camelCase")]
 pub struct ContentPipelineItem {
     pub id: String,
-    pub business_id: i64,
+    pub business_id: String,
     pub idea: String,
     pub status: String,
     pub platform: Option<String>,
     pub published_at: Option<String>,
     pub inbound_leads_generated: i64,
-    pub business_id: String,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -22,19 +21,18 @@ pub struct ContentPipelineItem {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateContentPipelineItemInput {
-    pub business_id: i64,
+    pub business_id: String,
     pub idea: String,
     pub status: Option<String>,
     pub platform: Option<String>,
     pub published_at: Option<String>,
     pub inbound_leads_generated: Option<i64>,
-    pub business_id: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateContentPipelineItemInput {
-    pub business_id: Option<i64>,
+    pub business_id: Option<String>,
     pub idea: Option<String>,
     pub status: Option<String>,
     pub platform: Option<String>,
@@ -52,7 +50,6 @@ impl ContentPipelineItem {
             platform: row.get("platform").ok(),
             published_at: row.get("published_at").ok(),
             inbound_leads_generated: row.get("inbound_leads_generated").unwrap(),
-            business_id: row.get("business_id").unwrap(),
             created_at: row.get("created_at").unwrap(),
             updated_at: row.get("updated_at").unwrap(),
         }
@@ -77,7 +74,7 @@ pub fn create_content_pipeline_item(db: tauri::State<'_, DbPool>, input: CreateC
     let id = uuid::Uuid::new_v4().to_string();
     let now = chrono::Utc::now().to_rfc3339();
     conn.execute(
-        "INSERT INTO content_pipeline_items (id, business_id, idea, status, platform, published_at, inbound_leads_generated, business_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO content_pipeline_items (id, business_id, idea, status, platform, published_at, inbound_leads_generated, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         rusqlite::params![
             id,
             input.business_id,
@@ -86,7 +83,6 @@ pub fn create_content_pipeline_item(db: tauri::State<'_, DbPool>, input: CreateC
             input.platform,
             input.published_at,
             input.inbound_leads_generated.unwrap_or(0),
-            input.business_id,
             &now,
             &now,
         ],

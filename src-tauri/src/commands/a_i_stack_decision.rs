@@ -8,14 +8,13 @@ use crate::db::DbPool;
 #[serde(rename_all = "camelCase")]
 pub struct AIStackDecision {
     pub id: String,
-    pub business_id: i64,
+    pub business_id: String,
     pub capability: String,
     pub decision: String,
     pub tool_or_approach: Option<String>,
     pub cost_per_month: f64,
     pub is_core_capability: i64,
     pub review_date: Option<String>,
-    pub business_id: String,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -23,20 +22,19 @@ pub struct AIStackDecision {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateAIStackDecisionInput {
-    pub business_id: i64,
+    pub business_id: String,
     pub capability: String,
     pub decision: Option<String>,
     pub tool_or_approach: Option<String>,
     pub cost_per_month: Option<f64>,
     pub is_core_capability: Option<i64>,
     pub review_date: Option<String>,
-    pub business_id: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateAIStackDecisionInput {
-    pub business_id: Option<i64>,
+    pub business_id: Option<String>,
     pub capability: Option<String>,
     pub decision: Option<String>,
     pub tool_or_approach: Option<String>,
@@ -56,7 +54,6 @@ impl AIStackDecision {
             cost_per_month: row.get("cost_per_month").unwrap(),
             is_core_capability: row.get("is_core_capability").unwrap(),
             review_date: row.get("review_date").ok(),
-            business_id: row.get("business_id").unwrap(),
             created_at: row.get("created_at").unwrap(),
             updated_at: row.get("updated_at").unwrap(),
         }
@@ -81,17 +78,16 @@ pub fn create_a_i_stack_decision(db: tauri::State<'_, DbPool>, input: CreateAISt
     let id = uuid::Uuid::new_v4().to_string();
     let now = chrono::Utc::now().to_rfc3339();
     conn.execute(
-        "INSERT INTO a_i_stack_decisions (id, business_id, capability, decision, tool_or_approach, cost_per_month, is_core_capability, review_date, business_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO a_i_stack_decisions (id, business_id, capability, decision, tool_or_approach, cost_per_month, is_core_capability, review_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         rusqlite::params![
             id,
             input.business_id,
             input.capability,
             input.decision.unwrap_or("buy".to_string()),
             input.tool_or_approach,
-            input.cost_per_month.unwrap_or(0),
+            input.cost_per_month.unwrap_or(0.0),
             input.is_core_capability.unwrap_or(0),
             input.review_date,
-            input.business_id,
             &now,
             &now,
         ],
